@@ -1,3 +1,6 @@
+.terraform.lock.hcl
+data/
+docker
 # Created by https://www.toptal.com/developers/gitignore/api/terraform,vim,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=terraform,vim,visualstudiocode
 

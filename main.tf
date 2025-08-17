@@ -2,7 +2,7 @@
 terraform {
   required_providers {
     docker = {
-      source = "kreuzwerker/docker"
+      source  = "kreuzwerker/docker"
       version = "~> 3.0.1"
     }
   }
@@ -73,7 +73,7 @@ module "cassandra" {
 # MongoDB Module
 module "mongodb" {
   source = "./modules/mongodb"
-  
+
   enabled       = var.enable_mongodb
   environment   = var.environment
   external_port = var.mongodb_port
@@ -86,11 +86,11 @@ module "mongodb" {
 # Neo4j Module
 module "neo4j" {
   source = "./modules/neo4j"
-  
-  enabled   = var.enable_neo4j
+
+  enabled     = var.enable_neo4j
   environment = var.environment
-  http_port = var.neo4j_http_port
-  bolt_port = var.neo4j_bolt_port
-  password  = var.neo4j_password
-  data_path = var.data_path
+  http_port   = var.neo4j_http_port
+  bolt_port   = var.neo4j_bolt_port
+  password    = var.neo4j_password
+  data_path   = var.data_path
 }

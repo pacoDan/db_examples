@@ -12,6 +12,7 @@ terraform {
 }
 
 resource "docker_image" "sqlserver" {
+  count = var.enabled ? 1 : 0  # ← AGREGAR ESTA LÍNEA
   name = "mcr.microsoft.com/mssql/server:${var.sqlserver_version}"
    # Evita que la imagen se borre al hacer destroy
   keep_locally = true
@@ -19,7 +20,7 @@ resource "docker_image" "sqlserver" {
 
 resource "docker_container" "sqlserver" {
   count = var.enabled ? 1 : 0
-  image = docker_image.sqlserver.image_id
+  image = docker_image.sqlserver[0].image_id
   name  = "${var.environment}-sqlserver-${var.instance_name}"
 
   ports {

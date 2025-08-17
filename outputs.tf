@@ -17,62 +17,62 @@ output "connection_info" {
   description = "Connection information for deployed databases"
   value = {
     redis = var.enable_redis ? {
-      host = "localhost"
-      port = var.redis_port
-      password = var.redis_password
+      host              = "localhost"
+      port              = var.redis_port
+      password          = var.redis_password
       connection_string = "redis://:${var.redis_password}@localhost:${var.redis_port}"
     } : null
-    
+
     postgresql = var.enable_postgresql ? {
-      host = "localhost"
-      port = var.postgres_port
-      database = var.postgres_db_name
-      username = var.postgres_username
-      password = var.postgres_password
+      host              = "localhost"
+      port              = var.postgres_port
+      database          = var.postgres_db_name
+      username          = var.postgres_username
+      password          = var.postgres_password
       connection_string = "postgresql://${var.postgres_username}:${var.postgres_password}@localhost:${var.postgres_port}/${var.postgres_db_name}"
     } : null
-    
+
     mysql = var.enable_mysql ? {
-      host = "localhost"
-      port = var.mysql_port
-      database = var.mysql_db_name
-      username = "root"
-      password = var.mysql_password
+      host              = "localhost"
+      port              = var.mysql_port
+      database          = var.mysql_db_name
+      username          = "root"
+      password          = var.mysql_password
       connection_string = "mysql://root:${var.mysql_password}@localhost:${var.mysql_port}/${var.mysql_db_name}"
     } : null
-    
+
     sqlserver = var.enable_sqlserver ? {
-      host = "localhost"
-      port = var.sqlserver_port
-      username = "sa"
-      password = var.sqlserver_password
+      host              = "localhost"
+      port              = var.sqlserver_port
+      username          = "sa"
+      password          = var.sqlserver_password
       connection_string = "Server=localhost,${var.sqlserver_port};User Id=sa;Password=${var.sqlserver_password};TrustServerCertificate=true;"
     } : null
-    
+
     neo4j = var.enable_neo4j ? {
-      http_host = "localhost"
-      http_port = var.neo4j_http_port
-      bolt_port = var.neo4j_bolt_port
-      username = "neo4j"
-      password = var.neo4j_password
-      http_url = "http://localhost:${var.neo4j_http_port}"
-      bolt_url = "bolt://localhost:${var.neo4j_bolt_port}"
+      http_host         = "localhost"
+      http_port         = var.neo4j_http_port
+      bolt_port         = var.neo4j_bolt_port
+      username          = "neo4j"
+      password          = var.neo4j_password
+      http_url          = "http://localhost:${var.neo4j_http_port}"
+      bolt_url          = "bolt://localhost:${var.neo4j_bolt_port}"
       connection_string = "bolt://neo4j:${var.neo4j_password}@localhost:${var.neo4j_bolt_port}"
     } : null
-    
+
     cassandra = var.enable_cassandra ? {
-      host = "localhost"
-      port = var.cassandra_port
-      cluster_name = var.cassandra_cluster_name
+      host              = "localhost"
+      port              = var.cassandra_port
+      cluster_name      = var.cassandra_cluster_name
       connection_string = "cassandra://localhost:${var.cassandra_port}"
     } : null
-    
+
     mongodb = var.enable_mongodb ? {
-      host = "localhost"
-      port = var.mongodb_port
-      database = var.mongodb_database
-      username = var.mongodb_username
-      password = var.mongodb_password
+      host              = "localhost"
+      port              = var.mongodb_port
+      database          = var.mongodb_database
+      username          = var.mongodb_username
+      password          = var.mongodb_password
       connection_string = "mongodb://${var.mongodb_username}:${var.mongodb_password}@localhost:${var.mongodb_port}/${var.mongodb_database}"
     } : null
   }
@@ -109,13 +109,13 @@ output "database_urls" {
 output "health_check_commands" {
   description = "Commands to check database health"
   value = {
-    redis = var.enable_redis ? "docker exec ${var.environment}-redis-main redis-cli ping" : null
+    redis      = var.enable_redis ? "docker exec ${var.environment}-redis-main redis-cli ping" : null
     postgresql = var.enable_postgresql ? "docker exec ${var.environment}-postgres-main pg_isready -U ${var.postgres_username}" : null
-    mysql = var.enable_mysql ? "docker exec ${var.environment}-mysql-main mysqladmin ping -h localhost" : null
-    sqlserver = var.enable_sqlserver ? "docker exec ${var.environment}-sqlserver-main /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${var.sqlserver_password} -Q 'SELECT 1'" : null
-    cassandra = var.enable_cassandra ? "docker exec ${var.environment}-cassandra-main cqlsh -e 'describe cluster'" : null
-    neo4j = var.enable_neo4j ? "docker exec ${var.environment}-neo4j-main cypher-shell -u neo4j -p ${var.neo4j_password} 'RETURN 1'" : null
-    mongodb = var.enable_mongodb ? "docker exec ${var.environment}-mongodb-main mongosh --eval 'db.adminCommand(\"ping\")'" : null
+    mysql      = var.enable_mysql ? "docker exec ${var.environment}-mysql-main mysqladmin ping -h localhost" : null
+    sqlserver  = var.enable_sqlserver ? "docker exec ${var.environment}-sqlserver-main /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P ${var.sqlserver_password} -Q 'SELECT 1'" : null
+    cassandra  = var.enable_cassandra ? "docker exec ${var.environment}-cassandra-main cqlsh -e 'describe cluster'" : null
+    neo4j      = var.enable_neo4j ? "docker exec ${var.environment}-neo4j-main cypher-shell -u neo4j -p ${var.neo4j_password} 'RETURN 1'" : null
+    mongodb    = var.enable_mongodb ? "docker exec ${var.environment}-mongodb-main mongosh --eval 'db.adminCommand(\"ping\")'" : null
   }
   sensitive = true
 }

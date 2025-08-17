@@ -8,12 +8,14 @@ terraform {
 }
 
 resource "docker_image" "neo4j" {
+  count = var.enabled ? 1 : 0
   name = "neo4j:${var.neo4j_version}"
+  keep_locally = true
 }
 
 resource "docker_container" "neo4j" {
   count = var.enabled ? 1 : 0
-  image = docker_image.neo4j.image_id
+  image = docker_image.neo4j[0].image_id
   name  = "${var.environment}-neo4j-${var.instance_name}"
   
   ports {

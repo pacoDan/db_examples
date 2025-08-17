@@ -8,12 +8,14 @@ terraform {
 }
 
 resource "docker_image" "postgres" {
+  count = var.enabled ? 1 : 0
   name = "postgres:${var.postgres_version}"
+  keep_locally = true
 }
 
 resource "docker_container" "postgres" {
   count = var.enabled ? 1 : 0
-  image = docker_image.postgres.image_id
+  image = docker_image.postgres[0].image_id
   name  = "${var.environment}-postgres-${var.instance_name}"
   
   ports {

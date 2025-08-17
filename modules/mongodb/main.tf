@@ -8,12 +8,14 @@ terraform {
 }
 
 resource "docker_image" "mongodb" {
+  count = var.enabled ? 1 : 0
   name = "mongo:${var.mongodb_version}"
+  keep_locally = true
 }
 
 resource "docker_container" "mongodb" {
   count = var.enabled ? 1 : 0
-  image = docker_image.mongodb.image_id
+  image = docker_image.mongodb[0].image_id
   name  = "${var.environment}-mongodb-${var.instance_name}"
   
   ports {

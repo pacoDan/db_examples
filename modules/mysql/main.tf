@@ -8,12 +8,14 @@ terraform {
 }
 
 resource "docker_image" "mysql" {
+  count = var.enabled ? 1 : 0
   name = "mysql:${var.mysql_version}"
+  keep_locally = true
 }
 
 resource "docker_container" "mysql" {
   count = var.enabled ? 1 : 0
-  image = docker_image.mysql.image_id
+  image = docker_image.mysql[0].image_id
   name  = "${var.environment}-mysql-${var.instance_name}"
 
   ports {
