@@ -13,6 +13,8 @@ terraform {
 
 resource "docker_image" "sqlserver" {
   name = "mcr.microsoft.com/mssql/server:${var.sqlserver_version}"
+   # Evita que la imagen se borre al hacer destroy
+  keep_locally = true
 }
 
 resource "docker_container" "sqlserver" {
@@ -24,22 +26,21 @@ resource "docker_container" "sqlserver" {
     internal = 1433
     external = var.external_port
   }
-
-  volumes {
-    host_path      = "${var.data_path}/sqlserver/data"
-    container_path = "/var/opt/mssql/data"
-  }
-
-  volumes {
-    host_path      = "${var.data_path}/sqlserver/log"
-    container_path = "/var/opt/mssql/log"
-  }
-
-  volumes {
-    host_path      = "${var.data_path}/sqlserver/secrets"
-    container_path = "/var/opt/mssql/secrets"
-  }
-
+  # Comentar volúmenes temporalmente para evitar problemas de permisos
+  # volumes {
+  #   host_path      = abspath("${var.data_path}/sqlserver/data")
+  #   container_path = "/var/opt/mssql/data"
+  # }
+  # 
+  # volumes {
+  #   host_path      = abspath("${var.data_path}/sqlserver/log")
+  #   container_path = "/var/opt/mssql/log"
+  # }
+  # 
+  # volumes {
+  #   host_path      = abspath("${var.data_path}/sqlserver/secrets")
+  #   container_path = "/var/opt/mssql/secrets"
+  # }
   env = [
     "ACCEPT_EULA=Y",
     "SA_PASSWORD=${var.sa_password}",

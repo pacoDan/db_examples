@@ -4,7 +4,7 @@ data_path   = "./data"
 
 # Habilitar solo las bases de datos que necesites
 enable_redis      = true
-enable_postgresql = false
+enable_postgresql = true
 enable_mysql      = true
 enable_sqlserver  = false
 
@@ -15,7 +15,7 @@ mysql_port     = 3306
 sqlserver_port = 1433
 
 # Passwords (cambiar en producción)
-redis_password     = "redis123"
-postgres_password  = "postgres123"
-mysql_password     = "MySecurePassword123!"
+redis_password     = "1234"
+postgres_password  = "1234"
+mysql_password     = "1234"
 sqlserver_password = "MySecurePassword123!"

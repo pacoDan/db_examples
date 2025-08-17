@@ -22,7 +22,7 @@ resource "docker_container" "postgres" {
   }
   
   volumes {
-    host_path      = "${var.data_path}/postgres"
+    host_path      = abspath("${var.data_path}/postgres")
     container_path = "/var/lib/postgresql/data"
   }
   
