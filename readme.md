@@ -1,3 +1,11 @@
+ # Crear todos los directorios de datos
+```sh
+mkdir -p data/{redis,postgres,mysql,sqlserver/{data,log,secrets},cassandra,mongodb,neo4j/{data,logs}}
+```
+# Aplicar los cambios
+```sh
+terraform apply -auto-approve
+```
 estructura del proyecto:
 ```txt
 terraform-databases/
