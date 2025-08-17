@@ -15,20 +15,20 @@ resource "docker_container" "redis" {
   count = var.enabled ? 1 : 0
   image = docker_image.redis.image_id
   name  = "${var.environment}-redis-${var.instance_name}"
-  
+
   ports {
     internal = 6379
     external = var.external_port
   }
-  
+
   volumes {
-    host_path      = "${var.data_path}/redis"
+    host_path      = abspath("${var.data_path}/redis")
     container_path = "/data"
   }
-  
+
   env = var.redis_password != "" ? [
     "REDIS_PASSWORD=${var.redis_password}"
   ] : []
-  
+
   restart = "unless-stopped"
 }
