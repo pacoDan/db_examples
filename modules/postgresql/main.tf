@@ -37,3 +37,34 @@ resource "docker_container" "postgres" {
   
   restart = "unless-stopped"
 }
+# pgAdmin
+resource "docker_image" "pgadmin" {
+  count = var.enabled && var.enable_pgadmin ? 1 : 0
+  name = "dpage/pgadmin4:${var.pgadmin_version}"
+  keep_locally = true
+}
+
+resource "docker_container" "pgadmin" {
+  count = var.enabled && var.enable_pgadmin ? 1 : 0
+  image = docker_image.pgadmin[0].image_id
+  name  = "${var.environment}-pgadmin-${var.instance_name}"
+
+  ports {
+    internal = 80
+    external = var.pgadmin_port
+  }
+
+  volumes {
+    host_path      = abspath("${var.data_path}/pgadmin")
+    container_path = "/var/lib/pgadmin"
+  }
+
+  env = [
+    "PGADMIN_DEFAULT_EMAIL=${var.pgadmin_email}",
+    "PGADMIN_DEFAULT_PASSWORD=${var.pgadmin_password}",
+    "PGADMIN_CONFIG_SERVER_MODE=False"
+  ]
+
+  user = "root"
+  restart = "unless-stopped"
+}

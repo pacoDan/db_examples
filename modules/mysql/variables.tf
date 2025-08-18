@@ -1,6 +1,6 @@
 # modules/mysql/variables.tf
 variable "enabled" {
-  description = "Enable MySQL deployment"
+  description = "Habilitar MySQL"
   type        = bool
   default     = false
 }
@@ -57,4 +57,23 @@ variable "data_path" {
   description = "Host path for data persistence"
   type        = string
   default     = "./data"
+}
+
+# Variables para phpMyAdmin (solo una vez)
+variable "enable_phpmyadmin" {
+  description = "Habilitar phpMyAdmin"
+  type        = bool
+  default     = true
+}
+
+variable "phpmyadmin_port" {
+  description = "Puerto para phpMyAdmin"
+  type        = number
+  default     = 8080
+}
+
+variable "phpmyadmin_version" {
+  description = "Versión de phpMyAdmin"
+  type        = string
+  default     = "latest"
 }

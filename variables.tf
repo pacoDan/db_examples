@@ -1,188 +1,234 @@
-# variables.tf - Archivo principal de variables
-# Global Variables
+# variables.tf
 variable "environment" {
-  description = "Environment name (dev, test, prod)"
+  description = "Nombre del ambiente"
   type        = string
   default     = "dev"
 }
 
 variable "data_path" {
-  description = "Host path for data persistence"
+  description = "Ruta para datos persistentes"
   type        = string
   default     = "./data"
 }
 
-# Redis Variables
+# Habilitar bases de datos
 variable "enable_redis" {
-  description = "Enable Redis deployment"
+  description = "Habilitar Redis"
   type        = bool
   default     = false
 }
 
+variable "enable_postgresql" {
+  description = "Habilitar PostgreSQL"
+  type        = bool
+  default     = false
+}
+
+variable "enable_mysql" {
+  description = "Habilitar MySQL"
+  type        = bool
+  default     = false
+}
+
+variable "enable_sqlserver" {
+  description = "Habilitar SQL Server"
+  type        = bool
+  default     = false
+}
+
+variable "enable_mongodb" {
+  description = "Habilitar MongoDB"
+  type        = bool
+  default     = false
+}
+
+variable "enable_cassandra" {
+  description = "Habilitar Cassandra"
+  type        = bool
+  default     = false
+}
+
+variable "enable_neo4j" {
+  description = "Habilitar Neo4j"
+  type        = bool
+  default     = false
+}
+
+# Cliente web settings
+variable "enable_web_clients" {
+  description = "Habilitar clientes web para todas las bases de datos"
+  type        = bool
+  default     = true
+}
+
+# Puertos de bases de datos
 variable "redis_port" {
-  description = "External port for Redis"
+  description = "Puerto para Redis"
   type        = number
   default     = 6379
 }
 
-variable "redis_password" {
-  description = "Redis password"
-  type        = string
-  sensitive   = true
-  default     = "redis123"
-}
-
-# PostgreSQL Variables
-variable "enable_postgresql" {
-  description = "Enable PostgreSQL deployment"
-  type        = bool
-  default     = false
-}
-
 variable "postgres_port" {
-  description = "External port for PostgreSQL"
+  description = "Puerto para PostgreSQL"
   type        = number
   default     = 5432
 }
 
-variable "postgres_db_name" {
-  description = "PostgreSQL initial database name"
-  type        = string
-  default     = "testdb"
-}
-
-variable "postgres_username" {
-  description = "PostgreSQL username"
-  type        = string
-  default     = "postgres"
-}
-
-variable "postgres_password" {
-  description = "PostgreSQL password"
-  type        = string
-  sensitive   = true
-  default     = "postgres123"
-}
-
-# MySQL Variables
-variable "enable_mysql" {
-  description = "Enable MySQL deployment"
-  type        = bool
-  default     = false
-}
-
 variable "mysql_port" {
-  description = "External port for MySQL"
+  description = "Puerto para MySQL"
   type        = number
   default     = 3306
 }
 
-variable "mysql_password" {
-  description = "MySQL root password"
-  type        = string
-  sensitive   = true
-  default     = "MySecurePassword123!"
-}
-
-variable "mysql_db_name" {
-  description = "MySQL initial database name"
-  type        = string
-  default     = "testdb"
-}
-
-# SQL Server Variables
-variable "enable_sqlserver" {
-  description = "Enable SQL Server deployment"
-  type        = bool
-  default     = false
-}
-
 variable "sqlserver_port" {
-  description = "External port for SQL Server"
+  description = "Puerto para SQL Server"
   type        = number
   default     = 1433
 }
 
-variable "sqlserver_password" {
-  description = "SQL Server SA password"
-  type        = string
-  sensitive   = true
-  default     = "MySecurePassword123!"
-}
-
-# Cassandra Variables
-variable "enable_cassandra" {
-  description = "Enable Cassandra deployment"
-  type        = bool
-  default     = false
+variable "mongodb_port" {
+  description = "Puerto para MongoDB"
+  type        = number
+  default     = 27017
 }
 
 variable "cassandra_port" {
-  description = "External port for Cassandra"
+  description = "Puerto para Cassandra"
   type        = number
   default     = 9042
 }
 
-variable "cassandra_cluster_name" {
-  description = "Cassandra cluster name"
-  type        = string
-  default     = "TestCluster"
-}
-
-# Neo4j Variables
-variable "enable_neo4j" {
-  description = "Enable Neo4j deployment"
-  type        = bool
-  default     = false
-}
-
 variable "neo4j_http_port" {
-  description = "External HTTP port for Neo4j"
+  description = "Puerto HTTP para Neo4j"
   type        = number
   default     = 7474
 }
 
 variable "neo4j_bolt_port" {
-  description = "External Bolt port for Neo4j"
+  description = "Puerto Bolt para Neo4j"
   type        = number
   default     = 7687
 }
 
-variable "neo4j_password" {
-  description = "Neo4j password"
-  type        = string
-  sensitive   = true
-  default     = "neo4j123"
-}
-
-# MongoDB Variables
-variable "enable_mongodb" {
-  description = "Enable MongoDB deployment"
-  type        = bool
-  default     = false
-}
-
-variable "mongodb_port" {
-  description = "External port for MongoDB"
+# Puertos de clientes web
+variable "phpmyadmin_port" {
+  description = "Puerto para phpMyAdmin"
   type        = number
-  default     = 27017
+  default     = 8080
+}
+
+variable "pgadmin_port" {
+  description = "Puerto para pgAdmin"
+  type        = number
+  default     = 8081
+}
+
+variable "redis_commander_port" {
+  description = "Puerto para Redis Commander"
+  type        = number
+  default     = 8082
+}
+
+variable "mongo_express_port" {
+  description = "Puerto para Mongo Express"
+  type        = number
+  default     = 8083
+}
+
+# Passwords
+variable "redis_password" {
+  description = "Password para Redis"
+  type        = string
+  default     = ""
+}
+
+variable "postgres_password" {
+  description = "Password para PostgreSQL"
+  type        = string
+  default     = "postgres"
+}
+
+variable "postgres_username" {
+  description = "Usuario para PostgreSQL"
+  type        = string
+  default     = "postgres"
+}
+
+variable "postgres_db_name" {
+  description = "Nombre de la base de datos PostgreSQL"
+  type        = string
+  default     = "testdb"
+}
+
+variable "mysql_password" {
+  description = "Password root para MySQL"
+  type        = string
+  default     = "mysql"
+}
+
+variable "mysql_db_name" {
+  description = "Nombre de la base de datos MySQL"
+  type        = string
+  default     = "testdb"
+}
+
+variable "sqlserver_password" {
+  description = "Password SA para SQL Server"
+  type        = string
+  default     = "MySecurePassword123!"
 }
 
 variable "mongodb_username" {
-  description = "MongoDB username"
+  description = "Usuario para MongoDB"
   type        = string
   default     = "admin"
 }
 
 variable "mongodb_password" {
-  description = "MongoDB password"
+  description = "Password para MongoDB"
   type        = string
-  sensitive   = true
-  default     = "mongodb123"
+  default     = "admin"
 }
 
 variable "mongodb_database" {
-  description = "MongoDB initial database"
+  description = "Nombre de la base de datos MongoDB"
   type        = string
   default     = "testdb"
+}
+
+variable "cassandra_cluster_name" {
+  description = "Nombre del cluster Cassandra"
+  type        = string
+  default     = "TestCluster"
+}
+
+variable "neo4j_password" {
+  description = "Password para Neo4j"
+  type        = string
+  default     = "neo4j123"
+}
+
+# Configuración de clientes web
+variable "pgadmin_email" {
+  description = "Email para pgAdmin"
+  type        = string
+  default     = "admin@example.com"
+}
+
+variable "pgadmin_password" {
+  description = "Password para pgAdmin"
+  type        = string
+  default     = "admin123"
+}
+
+variable "mongo_express_user" {
+  description = "Usuario para Mongo Express"
+  type        = string
+  default     = "admin"
+}
+
+variable "mongo_express_password" {
+  description = "Password para Mongo Express"
+  type        = string
+  default     = "pass"
 }

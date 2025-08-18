@@ -1,5 +1,6 @@
+# modules/redis/variables.tf
 variable "enabled" {
-  description = "Enable Redis deployment"
+  description = "Habilitar Redis"
   type        = bool
   default     = false
 }
@@ -14,6 +15,13 @@ variable "external_port" {
   description = "External port for Redis"
   type        = number
   default     = 6379
+}
+
+variable "redis_password" {
+  description = "Redis password"
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 variable "environment" {
@@ -33,9 +41,21 @@ variable "data_path" {
   default     = "./data"
 }
 
-variable "redis_password" {
-  description = "Redis password"
+# Variables para Redis Commander
+variable "enable_redis_commander" {
+  description = "Habilitar Redis Commander"
+  type        = bool
+  default     = true
+}
+
+variable "redis_commander_port" {
+  description = "Puerto para Redis Commander"
+  type        = number
+  default     = 8082
+}
+
+variable "redis_commander_version" {
+  description = "Versión de Redis Commander"
   type        = string
-  sensitive   = true
-  default     = ""
+  default     = "latest"
 }

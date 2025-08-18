@@ -21,6 +21,10 @@ module "redis" {
   external_port  = var.redis_port
   data_path      = var.data_path
   redis_password = var.redis_password
+
+  # Redis Commander
+  enable_redis_commander = var.enable_web_clients
+  redis_commander_port   = var.redis_commander_port
 }
 
 # PostgreSQL Module
@@ -34,17 +38,12 @@ module "postgresql" {
   username      = var.postgres_username
   password      = var.postgres_password
   data_path     = var.data_path
-}
 
-# SQL Server Module
-module "sqlserver" {
-  source = "./modules/sqlserver"
-
-  enabled       = var.enable_sqlserver
-  environment   = var.environment
-  external_port = var.sqlserver_port
-  sa_password   = var.sqlserver_password
-  data_path     = var.data_path
+  # pgAdmin
+  enable_pgadmin    = var.enable_web_clients
+  pgadmin_port      = var.pgadmin_port
+  pgadmin_email     = var.pgadmin_email
+  pgadmin_password  = var.pgadmin_password
 }
 
 # MySQL Module
@@ -56,6 +55,21 @@ module "mysql" {
   external_port = var.mysql_port
   root_password = var.mysql_password
   database_name = var.mysql_db_name
+  data_path     = var.data_path
+
+  # phpMyAdmin
+  enable_phpmyadmin = var.enable_web_clients
+  phpmyadmin_port   = var.phpmyadmin_port
+}
+
+# SQL Server Module
+module "sqlserver" {
+  source = "./modules/sqlserver"
+
+  enabled       = var.enable_sqlserver
+  environment   = var.environment
+  external_port = var.sqlserver_port
+  sa_password   = var.sqlserver_password
   data_path     = var.data_path
 }
 
@@ -81,6 +95,11 @@ module "mongodb" {
   password      = var.mongodb_password
   database_name = var.mongodb_database
   data_path     = var.data_path
+  # Mongo Express
+  enable_mongo_express = var.enable_web_clients
+  mongo_express_port   = var.mongo_express_port
+  mongo_express_user   = var.mongo_express_user
+  mongo_express_password = var.mongo_express_password
 }
 
 # Neo4j Module
