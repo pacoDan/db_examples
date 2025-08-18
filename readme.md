@@ -1,4 +1,13 @@
- # Crear todos los directorios de datos
+habria que mover los .tfvars dentro de la carpeta environments
+```sh
+# Para desarrollo
+terraform apply -var-file="environments/dev.tfvars"
+# Para producción
+terraform apply -var-file="environments/prod.tfvars"
+```
+variables.tf: Define la estructura y metadatos de las variables
+terraform.tfvars: Proporciona los valores específicos para un entorno
+# Crear todos los directorios de datos
 ```sh
 mkdir -p data/{redis,postgres,mysql,sqlserver/{data,log,secrets},cassandra,mongodb,neo4j/{data,logs}}
 ```
