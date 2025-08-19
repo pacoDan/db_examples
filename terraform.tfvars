@@ -1,51 +1,26 @@
-# terraform.tfvars
-environment = "dev"
-data_path   = "./data"
+# Configuración del proyecto
+environment  = "production"
+project_name = "database-infrastructure"
 
-# Habilitar solo las bases de datos que necesites
-enable_redis      = true
-enable_postgresql = true
-enable_mysql      = true
-enable_sqlserver  = false
-enable_mongodb    = false
-enable_cassandra  = false
-enable_neo4j      = false
+# Configuración de MySQL
+mysql_version       = "8.0"
+mysql_root_password = "SuperSecureRootPassword123!"
+mysql_database      = "main_database"
+mysql_user          = "dbadmin"
+mysql_password      = "SecureAdminPassword123!"
+mysql_external_port = 3306
 
-# Habilitar clientes web
-enable_web_clients = true
+# Configuración de phpMyAdmin
+phpmyadmin_version       = "latest"
+phpmyadmin_external_port = 8080
 
-# Configuración de puertos (evitar conflictos)
-redis_port     = 6379
-postgres_port  = 5432
-mysql_port     = 3306
-sqlserver_port = 1433
-mongodb_port   = 27017
-cassandra_port = 9042
-neo4j_http_port = 7474
-neo4j_bolt_port = 7687
+# Configuración de ngrok
+ngrok_version   = "latest"
+ngrok_authtoken = "1dxpB1SxTDiLGGS6FxxKjiPyXTE_5dgyzUfMV23w6D7ebYbd1"
+ngrok_region    = "us"
+ngrok_domain    = "" # Deja vacío para dominio automático
 
-# Puertos de clientes web
-phpmyadmin_port      = 8080
-pgadmin_port         = 8081
-redis_commander_port = 8082
-mongo_express_port   = 8083
+# Configuración de red
+network_subnet = "172.20.0.0/16"
 
-# Passwords (cambiar en producción)
-redis_password     = "1234"
-postgres_password  = "1234"
-postgres_username  = "postgres"
-postgres_db_name   = "testdb"
-mysql_password     = "1234"
-mysql_db_name      = "testdb"
-sqlserver_password = "MySecurePassword123!"
-mongodb_username   = "admin"
-mongodb_password   = "admin123"
-mongodb_database   = "testdb"
-cassandra_cluster_name = "TestCluster"
-neo4j_password     = "neo4j123"
-
-# Configuración de clientes web
-pgadmin_email      = "admin@localhost.com"
-pgadmin_password   = "admin123"
-mongo_express_user = "admin"
-mongo_express_password = "pass"
+ngrok_tunnel_target = "database-infrastructure-phpmyadmin:80"
