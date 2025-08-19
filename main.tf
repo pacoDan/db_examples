@@ -128,8 +128,35 @@ resource "docker_container" "mysql" {
     label = "project"
     value = var.project_name
   }
-}
 
+   # ... otros atributos del contenedor ... ante el cambio de contraseña
+  # Reemplazo del contenedor si la contraseña cambia
+  # Agrega esta sección
+  lifecycle {
+    replace_triggered_by = [
+      # null_resource.mysql_password_changed
+      null_resource.password_trigger
+    ]
+  }
+  depends_on = [
+    null_resource.password_trigger # Depende del recurso para que se active el cambio
+  ]
+}
+# resource "null_resource" "mysql_password_changed" {
+#   triggers = {
+#     root_password = var.mysql_root_password
+#   }
+# }
+# Este recurso es un "gatillo" para forzar la recreación de contenedores
+# cuando cambian variables sensibles, como contraseñas.
+resource "null_resource" "password_trigger" {
+  triggers = {
+    mysql_password = var.mysql_root_password
+    # Puedes añadir más contraseñas aquí si fuera necesario
+    # por ejemplo, redis_password = var.redis_password
+    # y luego usar esta misma dependencia en los demás contenedores.
+  }
+}
 # ----------------------------
 # phpMyAdmin Container
 # ----------------------------
@@ -141,7 +168,7 @@ resource "docker_container" "phpmyadmin" {
 
   networks_advanced {
     name         = docker_network.database_network.name
-    ipv4_address = "172.20.0.20"
+    # ipv4_address = "172.20.0.20"
   }
 
   ports {
@@ -181,6 +208,13 @@ resource "docker_container" "phpmyadmin" {
   labels {
     label = "project"
     value = var.project_name
+  }
+  # ... otros atributos del contenedor ...
+
+  lifecycle {
+    replace_triggered_by = [
+      null_resource.password_trigger
+    ]
   }
 }
 
@@ -236,14 +270,109 @@ resource "docker_container" "ngrok" {
     value = var.project_name
   }
 }
-# data "http" "ngrok_api" {
-#   url = "http://localhost:4040/api/tunnels"
-#     # Agrega esta dependencia para asegurar que el contenedor de ngrok esté ejecutándose
-#   depends_on = [
-#     docker_container.ngrok
-#   ]
-# }
-# locals {
-#   ngrok_api_response = jsondecode(data.http.ngrok_api.response_body)
-# }
+# ----------------------------
+# Redis Container
+# ----------------------------
+resource "docker_volume" "redis_data" {
+  name = "${var.project_name}-redis-data"
+}
 
+resource "docker_image" "redis" {
+  name         = "redis:${var.redis_version}"
+  keep_locally = true
+}
+
+resource "docker_container" "redis" {
+  image = docker_image.redis.image_id
+  name  = "${var.project_name}-redis"
+
+  restart = "unless-stopped"
+
+  networks_advanced {
+    name         = docker_network.database_network.name
+    ipv4_address = "172.20.0.40"
+  }
+
+  ports {
+    internal = 6379
+    external = var.redis_external_port
+  }
+
+  volumes {
+    volume_name    = docker_volume.redis_data.name
+    container_path = "/data"
+  }
+
+  memory = 256
+
+  labels {
+    label = "service"
+    value = "redis"
+  }
+
+  labels {
+    label = "environment"
+    value = var.environment
+  }
+
+  labels {
+    label = "project"
+    value = var.project_name
+  }
+}
+
+# ----------------------------
+# MongoDB Container
+# ----------------------------
+resource "docker_volume" "mongodb_data" {
+  name = "${var.project_name}-mongodb-data"
+}
+
+resource "docker_image" "mongodb" {
+  name         = "mongo:${var.mongodb_version}"
+  keep_locally = true
+}
+
+resource "docker_container" "mongodb" {
+  image = docker_image.mongodb.image_id
+  name  = "${var.project_name}-mongodb"
+
+  restart = "unless-stopped"
+
+  networks_advanced {
+    name         = docker_network.database_network.name
+    ipv4_address = "172.20.0.50"
+  }
+
+  ports {
+    internal = 27017
+    external = var.mongodb_external_port
+  }
+
+  volumes {
+    volume_name    = docker_volume.mongodb_data.name
+    container_path = "/data/db"
+  }
+
+  env = [
+    "MONGO_INITDB_ROOT_USERNAME=${var.mongodb_root_user}",
+    "MONGO_INITDB_ROOT_PASSWORD=${var.mongodb_root_password}"
+  ]
+
+  memory = 512
+
+  labels {
+    label = "service"
+    value = "mongodb"
+  }
+
+  labels {
+    label = "environment"
+    value = var.environment
+  }
+
+  labels {
+    label = "project"
+    value = var.project_name
+  }
+}

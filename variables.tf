@@ -104,3 +104,41 @@ variable "ngrok_tunnel_target" {
   description = "Servicio interno (host:puerto) que ngrok debe tunelar"
   type        = string
 }
+
+# Redis
+variable "redis_version" {
+  description = "Versión de Redis"
+  type        = string
+  default     = "7.0"
+}
+
+variable "redis_external_port" {
+  description = "Puerto externo para Redis"
+  type        = number
+  default     = 6379
+}
+
+# MongoDB
+variable "mongodb_version" {
+  description = "Versión de MongoDB"
+  type        = string
+  default     = "6.0"
+}
+
+variable "mongodb_external_port" {
+  description = "Puerto externo para MongoDB"
+  type        = number
+  default     = 27017
+}
+
+variable "mongodb_root_user" {
+  description = "Usuario root de MongoDB"
+  type        = string
+  default     = "admin"
+}
+
+variable "mongodb_root_password" {
+  description = "Contraseña root de MongoDB"
+  type        = string
+  sensitive   = true
+}

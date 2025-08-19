@@ -2,6 +2,17 @@ para ver la URL de ngrok
 ```sh
 docker logs database-infrastructure-ngrok
 ```
+tip profesional en entorno productivos: mariadb -h 127.0.0.1 -P 3306 -u root -p
+```sql
+docker exec -it database-infrastructure-mysql mysql -uroot -p
+ALTER USER 'root'@'%' IDENTIFIED BY 'NuevaPassword123!';
+```
+tip dev para parar el contenedor y eliminar el volumen:
+```sh
+docker rm -f database-infrastructure-mysql
+docker volume rm database-infrastructure-mysql-data
+terraform apply -auto-approve
+```
 habria que mover los .tfvars dentro de la carpeta environments
 ```sh
 # Para desarrollo

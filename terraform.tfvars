@@ -1,10 +1,11 @@
+ngrok_tunnel_target = "database-infrastructure-phpmyadmin:80"
 # Configuración del proyecto
 environment  = "production"
 project_name = "database-infrastructure"
 
 # Configuración de MySQL
 mysql_version       = "8.0"
-mysql_root_password = "SuperSecureRootPassword123!"
+mysql_root_password = "admin"
 mysql_database      = "main_database"
 mysql_user          = "dbadmin"
 mysql_password      = "SecureAdminPassword123!"
@@ -23,4 +24,10 @@ ngrok_domain    = "" # Deja vacío para dominio automático
 # Configuración de red
 network_subnet = "172.20.0.0/16"
 
-ngrok_tunnel_target = "database-infrastructure-phpmyadmin:80"
+redis_version       = "7.0"
+redis_external_port = 6379
+
+mongodb_version          = "6.0"
+mongodb_external_port    = 27017
+mongodb_root_user        = "admin"
+mongodb_root_password    = "SuperSecureMongoPass123!"
