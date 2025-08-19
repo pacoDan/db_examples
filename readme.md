@@ -13,6 +13,16 @@ docker rm -f database-infrastructure-mysql
 docker volume rm database-infrastructure-mysql-data
 terraform apply -auto-approve
 ```
+para probar redis:
+```sh
+docker exec -it database-infrastructure-redis redis-cli
+```
+
+
+
+
+---
+
 habria que mover los .tfvars dentro de la carpeta environments
 ```sh
 # Para desarrollo
