@@ -180,8 +180,10 @@ resource "docker_container" "phpmyadmin" {
   env = [
     "PMA_HOST=${var.project_name}-mysql",
     "PMA_PORT=3306",
-    "PMA_USER=${var.mysql_user}",
-    "PMA_PASSWORD=${var.mysql_password}",
+    # "PMA_USER=${var.mysql_user}",
+    "PMA_USER=root",  # Cambiado de var.mysql_user a "root"
+    # "PMA_PASSWORD=${var.mysql_password}",
+    "PMA_PASSWORD=${var.mysql_root_password}", # Cambiado de var.mysql_password a var.mysql_root_password
     "MYSQL_ROOT_PASSWORD=${var.mysql_root_password}",
     "PMA_ARBITRARY=1",
     "PMA_ABSOLUTE_URI=http://localhost:${var.phpmyadmin_external_port}",
