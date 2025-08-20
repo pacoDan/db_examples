@@ -31,3 +31,40 @@ mongodb_version          = "6.0"
 mongodb_external_port    = 27017
 mongodb_root_user        = "admin"
 mongodb_root_password    = "SuperSecureMongoPass123!"
+
+
+## casandra
+# Configuración de la imagen
+cassandra_image   = "cassandra"
+cassandra_version = "4.1"
+
+# Configuración del contenedor
+container_name = "cassandra-local"
+network_name   = "cassandra-net"
+volume_name    = "cassandra-data"
+
+# Configuración de puertos
+cassandra_port                 = 9042
+cassandra_inter_node_port      = 7000
+cassandra_ssl_inter_node_port  = 7001
+cassandra_jmx_port            = 7199
+cassandra_thrift_port         = 9160
+
+# Configuración del cluster
+cluster_name      = "Local Cluster"
+datacenter        = "datacenter1"
+rack              = "rack1"
+endpoint_snitch   = "GossipingPropertyFileSnitch"
+num_tokens        = 256
+
+# Configuración de memoria
+max_heap_size = "512M"
+heap_newsize  = "100M"
+memory_limit  = 1073741824  # 1GB en bytes
+
+# Credenciales (opcional, por defecto Cassandra no requiere autenticación)
+cassandra_username = "cassandra"
+cassandra_password = "cassandra"
+
+# Herramientas adicionales
+enable_tools_container = true

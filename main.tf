@@ -378,3 +378,116 @@ resource "docker_container" "mongodb" {
     value = var.project_name
   }
 }
+
+# Red para Cassandra
+resource "docker_network" "cassandra_network" {
+  name = var.network_name
+  driver = "bridge"
+}
+
+# Volumen para persistir datos
+resource "docker_volume" "cassandra_data" {
+  name = var.volume_name
+}
+
+# Contenedor de Cassandra
+resource "docker_container" "cassandra" {
+  name  = var.container_name
+  image = docker_image.cassandra.image_id
+
+  # Puertos
+  ports {
+    internal = 9042  # Puerto CQL nativo
+    external = var.cassandra_port
+  }
+
+  ports {
+    internal = 7000  # Puerto inter-nodo
+    external = var.cassandra_inter_node_port
+  }
+
+  ports {
+    internal = 7001  # Puerto SSL inter-nodo
+    external = var.cassandra_ssl_inter_node_port
+  }
+
+  ports {
+    internal = 7199  # Puerto JMX
+    external = var.cassandra_jmx_port
+  }
+
+  ports {
+    internal = 9160  # Puerto Thrift (legacy)
+    external = var.cassandra_thrift_port
+  }
+
+  # Variables de entorno
+  env = [
+    "CASSANDRA_CLUSTER_NAME=${var.cluster_name}",
+    "CASSANDRA_DC=${var.datacenter}",
+    "CASSANDRA_RACK=${var.rack}",
+    "CASSANDRA_ENDPOINT_SNITCH=${var.endpoint_snitch}",
+    "CASSANDRA_NUM_TOKENS=${var.num_tokens}",
+    "CASSANDRA_SEEDS=${var.container_name}",
+    "MAX_HEAP_SIZE=${var.max_heap_size}",
+    "HEAP_NEWSIZE=${var.heap_newsize}",
+    "CASSANDRA_USERNAME=${var.cassandra_username}",
+    "CASSANDRA_PASSWORD=${var.cassandra_password}"
+  ]
+
+  # Volúmenes
+  volumes {
+    volume_name    = docker_volume.cassandra_data.name
+    container_path = "/var/lib/cassandra"
+  }
+
+  # Red
+  networks_advanced {
+    name = docker_network.cassandra_network.name
+  }
+
+  # Configuración de recursos
+  memory = var.memory_limit
+  
+  # Health check
+  healthcheck {
+    test         = ["CMD-SHELL", "cqlsh -e 'describe cluster' || exit 1"]
+    interval     = "30s"
+    timeout      = "10s"
+    retries      = 5
+    start_period = "60s"
+  }
+
+  # Restart policy
+  restart = "unless-stopped"
+
+  # Esperar a que la red esté lista
+  depends_on = [docker_network.cassandra_network]
+}
+
+# Imagen de Cassandra
+resource "docker_image" "cassandra" {
+  name = "${var.cassandra_image}:${var.cassandra_version}"
+  
+  # No eliminar la imagen al destruir
+  keep_locally = true
+}
+
+# Contenedor opcional para herramientas de administración (cqlsh)
+resource "docker_container" "cassandra_tools" {
+  count = var.enable_tools_container ? 1 : 0
+  
+  name  = "${var.container_name}-tools"
+  image = docker_image.cassandra.image_id
+  
+  # Mantener el contenedor corriendo
+  command = ["tail", "-f", "/dev/null"]
+  
+  # Red
+  networks_advanced {
+    name = docker_network.cassandra_network.name
+  }
+  
+  # Depende del contenedor principal
+  depends_on = [docker_container.cassandra]
+}
