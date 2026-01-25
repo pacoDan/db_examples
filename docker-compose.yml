@@ -1,21 +1,11 @@
-services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sqlserver
-    restart: always
-    environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Pi3141592654!"
-    ports:
-      - "1433:1433"
-    volumes:
-      - sqlserver_data:/var/opt/mssql
+version: '3.8'
 
+services:
   postgres:
-    image: postgres:latest
+    image: postgres:16
     container_name: postgres
-    restart: always
-    shm_size: 128mb
+    restart: unless-stopped
+    shm_size: 256mb
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Pi3141592654!
@@ -25,13 +15,34 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: Pi3141592654!
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+
+  mssql-tools:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: mssql-tools
+    restart: "no"
+    network_mode: "service:sqlserver"  # Usamos la red de sqlserver para conexión
+    depends_on:
+      - sqlserver
+    entrypoint: ["tail", "-f", "/dev/null"]  # Mantiene el contenedor en ejecución sin hacer nada
+
   adminer:
     image: adminer
     container_name: adminer
-    restart: always
+    restart: unless-stopped
     ports:
       - "8080:8080"
 
 volumes:
-  sqlserver_data:
   postgres_data:
+  sqlserver_data:
