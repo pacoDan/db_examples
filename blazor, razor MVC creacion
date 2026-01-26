@@ -1,0 +1,162 @@
+#### Requisitos Previos
+- Instala .NET 8 (recomendado para compatibilidad con EF Core 8).
+- Instala herramientas globales: `dotnet tool install --global dotnet-ef` y `dotnet tool install --global dotnet-aspnet-codegenerator`.
+- Verifica instalación: `dotnet --version` (debe ser 8.x.x).
+
+#### Paso 1: Crear el Proyecto Base
+- Ejecuta estos comandos en una terminal nueva (crea el proyecto, instala paquetes con versiones compatibles, y verifica):
+  ```
+  dotnet new mvc -n ViajesPasajerosProyecto --framework net8.0
+  cd ViajesPasajerosProyecto
+  dotnet add package Microsoft.EntityFrameworkCore --version 8.0.0
+  dotnet add package Microsoft.EntityFrameworkCore.SqlServer --version 8.0.0
+  dotnet add package Microsoft.EntityFrameworkCore.Tools --version 8.0.0
+  dotnet run
+  ```
+  - Esto crea carpetas como `Controllers`, `Models`, `Views`.
+  - Abre en http://localhost:5000 para verificar (presiona Ctrl+C para detener).
+
+#### Paso 2: Configurar la Base de Datos
+- Crea `Models/ApplicationDbContext.cs` con este contenido exacto:
+  ```csharp
+  using Microsoft.EntityFrameworkCore;
+
+  namespace ViajesPasajerosProyecto.Models
+  {
+      public class ApplicationDbContext : DbContext
+      {
+          public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+
+          public DbSet<Pasajero> Pasajeros { get; set; }
+          public DbSet<Viaje> Viajes { get; set; }
+      }
+  }
+  ```
+- Edita `appsettings.json` para agregar la cadena de conexión (usa tus credenciales):
+  ```json
+  {
+    "ConnectionStrings": {
+      "DefaultConnection": "Server=192.168.0.126;Database=ViajesDB;User Id=sa;Password=Pi3141592654;TrustServerCertificate=True;"
+    },
+    // ... (resto del archivo)
+  }
+  ```
+- Edita `Program.cs` para registrar el DbContext (agrega `using ViajesPasajerosProyecto.Models;` y `using Microsoft.EntityFrameworkCore;` si faltan):
+  ```csharp
+  // ... (código existente)
+
+  builder.Services.AddDbContext<ApplicationDbContext>(options =>
+      options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+  // ... (resto del código)
+  ```
+
+#### Paso 3: Crear Modelos
+- Crea `Models/Pasajero.cs`:
+  ```csharp
+  using System.ComponentModel.DataAnnotations;
+
+  namespace ViajesPasajerosProyecto.Models
+  {
+      public class Pasajero
+      {
+          public int Id { get; set; }
+          [Required] public string Nombre { get; set; }
+          [Required] public string Apellido { get; set; }
+          [Required] public string DNI { get; set; }
+          [Required] public DateTime FechaNacimiento { get; set; }
+          public string UserId { get; set; }
+          public List<Viaje> Viajes { get; set; } = new();
+      }
+  }
+  ```
+- Crea `Models/Viaje.cs`:
+  ```csharp
+  using System.ComponentModel.DataAnnotations;
+
+  namespace ViajesPasajerosProyecto.Models
+  {
+      public class Viaje
+      {
+          public int Id { get; set; }
+          [Required] public DateTime FechaSalida { get; set; }
+          [Required] public DateTime FechaLlegada { get; set; }
+          [Required] public string Origen { get; set; }
+          [Required] public string Destino { get; set; }
+          [Required] public string MedioTransporte { get; set; }
+          [Required] public int PasajeroId { get; set; }
+          public Pasajero Pasajero { get; set; }
+      }
+  }
+  ```
+- Ejecuta para verificar compilación:
+  ```
+  dotnet clean
+  dotnet restore
+  dotnet build
+  ```
+  - Si hay errores, corrígelos antes de continuar (e.g., agrega `using System.Collections.Generic;` en Pasajero).
+
+#### Paso 4: Migraciones y Base de Datos
+- Crea migración inicial:
+  ```
+  dotnet ef migrations add InitialCreate
+  ```
+  - Si falla con "No DbContext found", asegúrate de que `Program.cs` esté correcto y el proyecto compile.
+- Actualiza la base de datos:
+  ```
+  dotnet ef database update
+  ```
+  - Esto crea tablas en SQL Server (192.168.0.126). Si hay errores de conexión, verifica firewall/credenciales (prueba con SSMS).
+
+#### Paso 5: Scaffolding para CRUD
+- Genera controlador y vistas para Pasajeros:
+  ```
+  dotnet aspnet-codegenerator controller -name PasajerosController -m Pasajero -dc ApplicationDbContext --relativeFolderPath Controllers --useDefaultLayout --referenceScriptLibraries -f
+  ```
+  - Crea `Controllers/PasajerosController.cs` y vistas en `Views/Pasajeros/` (Index, Create, Edit, Delete, Details).
+- Genera para Viajes:
+  ```
+  dotnet aspnet-codegenerator controller -name ViajesController -m Viaje -dc ApplicationDbContext --relativeFolderPath Controllers --useDefaultLayout --referenceScriptLibraries -f
+  ```
+  - Crea `Controllers/ViajesController.cs` y vistas en `Views/Viajes/`.
+- Personaliza vistas: En `Views/Viajes/Index.cshtml`, agrega una columna para el Pasajero (e.g., en la tabla, agrega `<td>@item.Pasajero?.Nombre</td>`).
+
+#### Paso 6: Personalizaciones Adicionales
+- **Relaciones y Navegación**: Edita `Views/Pasajeros/Details.cshtml` para agregar un enlace a viajes:
+  ```html
+  <a asp-controller="Viajes" asp-action="Index" asp-route-pasajeroId="@Model.Id">Ver Viajes</a>
+  ```
+- **Responsividad**: Las vistas usan Bootstrap; agrega `table-responsive` a tablas si es necesario.
+- **Roles y Seguridad**: Para el desafío, agrega Identity (opcional: `dotnet add package Microsoft.AspNetCore.Identity.EntityFrameworkCore --version 8.0.0` y configura en Program.cs). Usa `[Authorize(Roles = "Administrador")]` en controladores.
+- **Seeder**: En `Program.cs`, agrega después de `var app = builder.Build();`:
+  ```csharp
+  using (var scope = app.Services.CreateScope())
+  {
+      var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+      context.Database.EnsureCreated();
+      // Ejemplo: context.Pasajeros.Add(new Pasajero { Nombre = "Juan", ... });
+      context.SaveChanges();
+  }
+  ```
+- **Menú**: Edita `Views/Shared/_Layout.cshtml` para agregar enlaces (en el `<ul class="navbar-nav">`):
+  ```html
+  <li class="nav-item"><a class="nav-link" asp-controller="Pasajeros" asp-action="Index">Pasajeros</a></li>
+  <li class="nav-item"><a class="nav-link" asp-controller="Viajes" asp-action="Index">Viajes</a></li>
+  ```
+
+#### Paso 7: Ejecutar y Probar
+- Construye y ejecuta:
+  ```
+  dotnet build
+  dotnet run
+  ```
+- Navega a `/Pasajeros` y `/Viajes` para probar CRUD.
+- Para el desafío (filtrado por fecha, roles), edita `PasajerosController.cs` y `ViajesController.cs` para agregar lógica en el método `Index` (e.g., parámetros de query para fecha y ordenamiento).
+
+#### Notas Finales
+- Si SQL Server falla, cambia a SQLite: Remueve SqlServer, agrega `Microsoft.EntityFrameworkCore.Sqlite --version 8.0.0`, actualiza Program.cs a `UseSqlite`, y usa `"Data Source=viajes.db"` en appsettings.json.
+- Para el desafío completo (coordinador, asignar pasajeros), expande modelos manualmente (e.g., agrega `CoordinadorId` en Viaje).
+- Si encuentras errores en scaffolding, ejecuta `dotnet aspnet-codegenerator --help` para opciones.
+
+¡Este tutorial debería funcionar sin problemas ahora! Si hay errores en un paso específico, comparte el output. 😊
