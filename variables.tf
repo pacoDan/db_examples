@@ -1,234 +1,273 @@
-# variables.tf
+# Variables generales
 variable "environment" {
-  description = "Nombre del ambiente"
+  description = "Entorno de despliegue"
   type        = string
-  default     = "dev"
+  default     = "production"
 }
 
-variable "data_path" {
-  description = "Ruta para datos persistentes"
+variable "project_name" {
+  description = "Nombre del proyecto"
   type        = string
-  default     = "./data"
+  default     = "database-infrastructure"
 }
 
-# Habilitar bases de datos
-variable "enable_redis" {
-  description = "Habilitar Redis"
-  type        = bool
-  default     = false
+# Variables de MySQL
+variable "mysql_version" {
+  description = "Versión de MySQL"
+  type        = string
+  default     = "8.0"
 }
 
-variable "enable_postgresql" {
-  description = "Habilitar PostgreSQL"
-  type        = bool
-  default     = false
+variable "mysql_root_password" {
+  description = "Contraseña root para MySQL"
+  type        = string
+  sensitive   = true
 }
 
-variable "enable_mysql" {
-  description = "Habilitar MySQL"
-  type        = bool
-  default     = false
+variable "mysql_database" {
+  description = "Nombre de la base de datos inicial"
+  type        = string
+  default     = "main_database"
 }
 
-variable "enable_sqlserver" {
-  description = "Habilitar SQL Server"
-  type        = bool
-  default     = false
+variable "mysql_user" {
+  description = "Usuario de MySQL"
+  type        = string
+  default     = "dbadmin"
 }
 
-variable "enable_mongodb" {
-  description = "Habilitar MongoDB"
-  type        = bool
-  default     = false
+variable "mysql_password" {
+  description = "Contraseña del usuario MySQL"
+  type        = string
+  sensitive   = true
 }
 
-variable "enable_cassandra" {
-  description = "Habilitar Cassandra"
-  type        = bool
-  default     = false
-}
-
-variable "enable_neo4j" {
-  description = "Habilitar Neo4j"
-  type        = bool
-  default     = false
-}
-
-# Cliente web settings
-variable "enable_web_clients" {
-  description = "Habilitar clientes web para todas las bases de datos"
-  type        = bool
-  default     = true
-}
-
-# Puertos de bases de datos
-variable "redis_port" {
-  description = "Puerto para Redis"
-  type        = number
-  default     = 6379
-}
-
-variable "postgres_port" {
-  description = "Puerto para PostgreSQL"
-  type        = number
-  default     = 5432
-}
-
-variable "mysql_port" {
-  description = "Puerto para MySQL"
+variable "mysql_external_port" {
+  description = "Puerto externo para MySQL"
   type        = number
   default     = 3306
 }
 
-variable "sqlserver_port" {
-  description = "Puerto para SQL Server"
-  type        = number
-  default     = 1433
+# Variables de phpMyAdmin
+variable "phpmyadmin_version" {
+  description = "Versión de phpMyAdmin"
+  type        = string
+  default     = "latest"
 }
 
-variable "mongodb_port" {
-  description = "Puerto para MongoDB"
-  type        = number
-  default     = 27017
-}
-
-variable "cassandra_port" {
-  description = "Puerto para Cassandra"
-  type        = number
-  default     = 9042
-}
-
-variable "neo4j_http_port" {
-  description = "Puerto HTTP para Neo4j"
-  type        = number
-  default     = 7474
-}
-
-variable "neo4j_bolt_port" {
-  description = "Puerto Bolt para Neo4j"
-  type        = number
-  default     = 7687
-}
-
-# Puertos de clientes web
-variable "phpmyadmin_port" {
-  description = "Puerto para phpMyAdmin"
+variable "phpmyadmin_external_port" {
+  description = "Puerto externo para phpMyAdmin"
   type        = number
   default     = 8080
 }
 
-variable "pgadmin_port" {
-  description = "Puerto para pgAdmin"
-  type        = number
-  default     = 8081
+# Variables de ngrok
+variable "ngrok_version" {
+  description = "Versión de ngrok"
+  type        = string
+  default     = "latest"
 }
 
-variable "redis_commander_port" {
-  description = "Puerto para Redis Commander"
-  type        = number
-  default     = 8082
+variable "ngrok_authtoken" {
+  description = "Token de autenticación de ngrok"
+  type        = string
+  sensitive   = true
 }
 
-variable "mongo_express_port" {
-  description = "Puerto para Mongo Express"
-  type        = number
-  default     = 8083
+variable "ngrok_region" {
+  description = "Región de ngrok"
+  type        = string
+  default     = "us"
+
+  validation {
+    condition = contains([
+      "us", "eu", "ap", "au", "sa", "jp", "in"
+    ], var.ngrok_region)
+    error_message = "La región debe ser una de: us, eu, ap, au, sa, jp, in."
+  }
 }
 
-# Passwords
-variable "redis_password" {
-  description = "Password para Redis"
+variable "ngrok_domain" {
+  description = "Dominio personalizado de ngrok (opcional)"
   type        = string
   default     = ""
 }
 
-variable "postgres_password" {
-  description = "Password para PostgreSQL"
+# Variables de red
+variable "network_subnet" {
+  description = "Subred para la red Docker"
   type        = string
-  default     = "postgres"
+  default     = "172.20.0.0/16"
 }
 
-variable "postgres_username" {
-  description = "Usuario para PostgreSQL"
+variable "ngrok_tunnel_target" {
+  description = "Servicio interno (host:puerto) que ngrok debe tunelar"
   type        = string
-  default     = "postgres"
 }
 
-variable "postgres_db_name" {
-  description = "Nombre de la base de datos PostgreSQL"
+# Redis
+variable "redis_version" {
+  description = "Versión de Redis"
   type        = string
-  default     = "testdb"
+  default     = "7.0"
 }
 
-variable "mysql_password" {
-  description = "Password root para MySQL"
-  type        = string
-  default     = "mysql"
+variable "redis_external_port" {
+  description = "Puerto externo para Redis"
+  type        = number
+  default     = 6379
 }
 
-variable "mysql_db_name" {
-  description = "Nombre de la base de datos MySQL"
+# MongoDB
+variable "mongodb_version" {
+  description = "Versión de MongoDB"
   type        = string
-  default     = "testdb"
+  default     = "6.0"
 }
 
-variable "sqlserver_password" {
-  description = "Password SA para SQL Server"
-  type        = string
-  default     = "MySecurePassword123!"
+variable "mongodb_external_port" {
+  description = "Puerto externo para MongoDB"
+  type        = number
+  default     = 27017
 }
 
-variable "mongodb_username" {
-  description = "Usuario para MongoDB"
+variable "mongodb_root_user" {
+  description = "Usuario root de MongoDB"
   type        = string
   default     = "admin"
 }
 
-variable "mongodb_password" {
-  description = "Password para MongoDB"
+variable "mongodb_root_password" {
+  description = "Contraseña root de MongoDB"
   type        = string
-  default     = "admin"
+  sensitive   = true
 }
 
-variable "mongodb_database" {
-  description = "Nombre de la base de datos MongoDB"
+# CASSANDRA
+variable "cassandra_image" {
+  description = "Imagen de Docker para Cassandra"
   type        = string
-  default     = "testdb"
+  default     = "cassandra"
 }
 
-variable "cassandra_cluster_name" {
-  description = "Nombre del cluster Cassandra"
+variable "cassandra_version" {
+  description = "Versión de Cassandra"
   type        = string
-  default     = "TestCluster"
+  default     = "4.1"
 }
 
-variable "neo4j_password" {
-  description = "Password para Neo4j"
+variable "container_name" {
+  description = "Nombre del contenedor de Cassandra"
   type        = string
-  default     = "neo4j123"
+  default     = "cassandra-local"
 }
 
-# Configuración de clientes web
-variable "pgadmin_email" {
-  description = "Email para pgAdmin"
+variable "network_name" {
+  description = "Nombre de la red Docker"
   type        = string
-  default     = "admin@example.com"
+  default     = "cassandra-net"
 }
 
-variable "pgadmin_password" {
-  description = "Password para pgAdmin"
+variable "volume_name" {
+  description = "Nombre del volumen para datos"
   type        = string
-  default     = "admin123"
+  default     = "cassandra-data"
 }
 
-variable "mongo_express_user" {
-  description = "Usuario para Mongo Express"
-  type        = string
-  default     = "admin"
+variable "cassandra_port" {
+  description = "Puerto CQL de Cassandra"
+  type        = number
+  default     = 9042
 }
 
-variable "mongo_express_password" {
-  description = "Password para Mongo Express"
+variable "cassandra_inter_node_port" {
+  description = "Puerto de comunicación inter-nodo"
+  type        = number
+  default     = 7000
+}
+
+variable "cassandra_ssl_inter_node_port" {
+  description = "Puerto SSL de comunicación inter-nodo"
+  type        = number
+  default     = 7001
+}
+
+variable "cassandra_jmx_port" {
+  description = "Puerto JMX"
+  type        = number
+  default     = 7199
+}
+
+variable "cassandra_thrift_port" {
+  description = "Puerto Thrift (legacy)"
+  type        = number
+  default     = 9160
+}
+
+variable "cluster_name" {
+  description = "Nombre del cluster de Cassandra"
   type        = string
-  default     = "pass"
+  default     = "Local Cluster"
+}
+
+variable "datacenter" {
+  description = "Nombre del datacenter"
+  type        = string
+  default     = "datacenter1"
+}
+
+variable "rack" {
+  description = "Nombre del rack"
+  type        = string
+  default     = "rack1"
+}
+
+variable "endpoint_snitch" {
+  description = "Tipo de endpoint snitch"
+  type        = string
+  default     = "GossipingPropertyFileSnitch"
+}
+
+variable "num_tokens" {
+  description = "Número de tokens virtuales"
+  type        = number
+  default     = 256
+}
+
+variable "max_heap_size" {
+  description = "Tamaño máximo del heap de Java"
+  type        = string
+  default     = "512M"
+}
+
+variable "heap_newsize" {
+  description = "Tamaño del heap para objetos nuevos"
+  type        = string
+  default     = "100M"
+}
+
+variable "memory_limit" {
+  description = "Límite de memoria del contenedor en bytes"
+  type        = number
+  default     = 1073741824  # 1GB
+}
+
+variable "cassandra_username" {
+  description = "Usuario de Cassandra"
+  type        = string
+  default     = "cassandra"
+  sensitive   = true
+}
+
+variable "cassandra_password" {
+  description = "Contraseña de Cassandra"
+  type        = string
+  default     = "cassandra"
+  sensitive   = true
+}
+
+variable "enable_tools_container" {
+  description = "Habilitar contenedor con herramientas de administración"
+  type        = bool
+  default     = true
 }

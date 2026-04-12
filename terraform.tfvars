@@ -1,51 +1,70 @@
-# terraform.tfvars
-environment = "dev"
-data_path   = "./data"
+ngrok_tunnel_target = "database-infrastructure-phpmyadmin:80"
+# Configuración del proyecto
+environment  = "production"
+project_name = "database-infrastructure"
 
-# Habilitar solo las bases de datos que necesites
-enable_redis      = true
-enable_postgresql = true
-enable_mysql      = true
-enable_sqlserver  = false
-enable_mongodb    = false
-enable_cassandra  = false
-enable_neo4j      = false
+# Configuración de MySQL
+mysql_version       = "8.0"
+mysql_root_password = "admin"
+mysql_database      = "main_database"
+mysql_user          = "dbadmin"
+mysql_password      = "SecureAdminPassword123!"
+mysql_external_port = 3306
 
-# Habilitar clientes web
-enable_web_clients = true
+# Configuración de phpMyAdmin
+phpmyadmin_version       = "latest"
+phpmyadmin_external_port = 8080
 
-# Configuración de puertos (evitar conflictos)
-redis_port     = 6379
-postgres_port  = 5432
-mysql_port     = 3306
-sqlserver_port = 1433
-mongodb_port   = 27017
-cassandra_port = 9042
-neo4j_http_port = 7474
-neo4j_bolt_port = 7687
+# Configuración de ngrok
+ngrok_version   = "latest"
+ngrok_authtoken = "1dxpB1SxTDiLGGS6FxxKjiPyXTE_5dgyzUfMV23w6D7ebYbd1"
+ngrok_region    = "us"
+ngrok_domain    = "" # Deja vacío para dominio automático
 
-# Puertos de clientes web
-phpmyadmin_port      = 8080
-pgadmin_port         = 8081
-redis_commander_port = 8082
-mongo_express_port   = 8083
+# Configuración de red
+network_subnet = "172.20.0.0/16"
 
-# Passwords (cambiar en producción)
-redis_password     = "1234"
-postgres_password  = "1234"
-postgres_username  = "postgres"
-postgres_db_name   = "testdb"
-mysql_password     = "1234"
-mysql_db_name      = "testdb"
-sqlserver_password = "MySecurePassword123!"
-mongodb_username   = "admin"
-mongodb_password   = "admin123"
-mongodb_database   = "testdb"
-cassandra_cluster_name = "TestCluster"
-neo4j_password     = "neo4j123"
+redis_version       = "7.0"
+redis_external_port = 6379
 
-# Configuración de clientes web
-pgadmin_email      = "admin@localhost.com"
-pgadmin_password   = "admin123"
-mongo_express_user = "admin"
-mongo_express_password = "pass"
+mongodb_version          = "6.0"
+mongodb_external_port    = 27017
+mongodb_root_user        = "admin"
+mongodb_root_password    = "SuperSecureMongoPass123!"
+
+
+## casandra
+# Configuración de la imagen
+cassandra_image   = "cassandra"
+cassandra_version = "4.1"
+
+# Configuración del contenedor
+container_name = "cassandra-local"
+network_name   = "cassandra-net"
+volume_name    = "cassandra-data"
+
+# Configuración de puertos
+cassandra_port                 = 9042
+cassandra_inter_node_port      = 7000
+cassandra_ssl_inter_node_port  = 7001
+cassandra_jmx_port            = 7199
+cassandra_thrift_port         = 9160
+
+# Configuración del cluster
+cluster_name      = "Local Cluster"
+datacenter        = "datacenter1"
+rack              = "rack1"
+endpoint_snitch   = "GossipingPropertyFileSnitch"
+num_tokens        = 256
+
+# Configuración de memoria
+max_heap_size = "512M"
+heap_newsize  = "100M"
+memory_limit  = 1073741824  # 1GB en bytes
+
+# Credenciales (opcional, por defecto Cassandra no requiere autenticación)
+cassandra_username = "cassandra"
+cassandra_password = "cassandra"
+
+# Herramientas adicionales
+enable_tools_container = true
