@@ -18,9 +18,10 @@ resource "docker_network" "database_network" {
   }
 }
 
-# Volúmenes persistentes
+# Volúmenes persistentes (solo si el servicio esta habilitado)
 resource "docker_volume" "mysql_data" {
-  name = "${var.project_name}-mysql-data"
+  count = var.enable_mysql ? 1 : 0
+  name  = "${var.project_name}-mysql-data"
 
   labels {
     label = "service"
@@ -34,7 +35,8 @@ resource "docker_volume" "mysql_data" {
 }
 
 resource "docker_volume" "ngrok_config" {
-  name = "${var.project_name}-ngrok-config"
+  count = var.enable_ngrok ? 1 : 0
+  name  = "${var.project_name}-ngrok-config"
 
   labels {
     label = "service"
@@ -44,23 +46,23 @@ resource "docker_volume" "ngrok_config" {
 
 # Imágenes Docker
 resource "docker_image" "mysql" {
-  name         = "mysql:${var.mysql_version}"
-  keep_locally = true
-
+  count         = var.enable_mysql ? 1 : 0
+  name          = "mysql:${var.mysql_version}"
+  keep_locally  = true
   pull_triggers = ["mysql:${var.mysql_version}"]
 }
 
 resource "docker_image" "phpmyadmin" {
-  name         = "phpmyadmin:${var.phpmyadmin_version}"
-  keep_locally = true
-
+  count         = var.enable_phpmyadmin ? 1 : 0
+  name          = "phpmyadmin:${var.phpmyadmin_version}"
+  keep_locally  = true
   pull_triggers = ["phpmyadmin:${var.phpmyadmin_version}"]
 }
 
 resource "docker_image" "ngrok" {
-  name         = "ngrok/ngrok:${var.ngrok_version}"
-  keep_locally = true
-
+  count         = var.enable_ngrok ? 1 : 0
+  name          = "ngrok/ngrok:${var.ngrok_version}"
+  keep_locally  = true
   pull_triggers = ["ngrok/ngrok:${var.ngrok_version}"]
 }
 
@@ -68,7 +70,9 @@ resource "docker_image" "ngrok" {
 # MySQL Container
 # ----------------------------
 resource "docker_container" "mysql" {
-  image = docker_image.mysql.image_id
+  count = var.enable_mysql ? 1 : 0
+  # image = docker_image.mysql.image_id
+  image = docker_image.mysql[0].image_id #fixed: [0]
   name  = "${var.project_name}-mysql"
 
   restart = "unless-stopped"
@@ -83,9 +87,16 @@ resource "docker_container" "mysql" {
     external = var.mysql_external_port
   }
 
-  volumes {
-    volume_name    = docker_volume.mysql_data.name
-    container_path = "/var/lib/mysql"
+  # volumes {
+  # volume_name    = docker_volume.mysql_data.name
+  # container_path = "/var/lib/mysql"
+  # }
+  dynamic "volumes" { # fixed: dynamic block
+    for_each = var.enable_mysql ? [1] : []
+    content {
+      volume_name    = docker_volume.mysql_data[0].name # fixed: [0]
+      container_path = "/var/lib/mysql"
+    }
   }
 
   # Configuración de MySQL optimizada
@@ -129,14 +140,15 @@ resource "docker_container" "mysql" {
     value = var.project_name
   }
 
-   # ... otros atributos del contenedor ... ante el cambio de contraseña
+  # ... otros atributos del contenedor ... ante el cambio de contraseña
   # Reemplazo del contenedor si la contraseña cambia
   # Agrega esta sección
+  # lifecycle {
+  # null_resource.mysql_password_changed
+  # null_resource.password_trigger
+  # }
   lifecycle {
-    replace_triggered_by = [
-      # null_resource.mysql_password_changed
-      null_resource.password_trigger
-    ]
+    replace_triggered_by = [null_resource.password_trigger]
   }
   depends_on = [
     null_resource.password_trigger # Depende del recurso para que se active el cambio
@@ -161,13 +173,15 @@ resource "null_resource" "password_trigger" {
 # phpMyAdmin Container
 # ----------------------------
 resource "docker_container" "phpmyadmin" {
-  image = docker_image.phpmyadmin.image_id
+  count = var.enable_phpmyadmin ? 1 : 0
+  # image = docker_image.phpmyadmin.image_id
+  image = docker_image.phpmyadmin[0].image_id #fixed: [0]
   name  = "${var.project_name}-phpmyadmin"
 
   restart = "unless-stopped"
 
   networks_advanced {
-    name         = docker_network.database_network.name
+    name = docker_network.database_network.name
     # ipv4_address = "172.20.0.20"
   }
 
@@ -181,7 +195,7 @@ resource "docker_container" "phpmyadmin" {
     "PMA_HOST=${var.project_name}-mysql",
     "PMA_PORT=3306",
     # "PMA_USER=${var.mysql_user}",
-    "PMA_USER=root",  # Cambiado de var.mysql_user a "root"
+    "PMA_USER=root", # Cambiado de var.mysql_user a "root"
     # "PMA_PASSWORD=${var.mysql_password}",
     "PMA_PASSWORD=${var.mysql_root_password}", # Cambiado de var.mysql_password a var.mysql_root_password
     "MYSQL_ROOT_PASSWORD=${var.mysql_root_password}",
@@ -224,7 +238,9 @@ resource "docker_container" "phpmyadmin" {
 # ngrok Container
 # ----------------------------
 resource "docker_container" "ngrok" {
-  image = docker_image.ngrok.image_id
+  count = var.enable_ngrok ? 1 : 0 #fixed: count
+  # image = docker_image.ngrok.image_id
+  image = docker_image.ngrok[0].image_id #fixed: [0]
   name  = "${var.project_name}-ngrok"
 
   restart = "unless-stopped"
@@ -252,7 +268,7 @@ resource "docker_container" "ngrok" {
   command = concat([
     "http",
     var.ngrok_tunnel_target,
-    "--region=${var.ngrok_region}","--log=stdout"
+    "--region=${var.ngrok_region}", "--log=stdout"
   ], var.ngrok_domain != "" ? ["--domain=${var.ngrok_domain}"] : [])
 
   depends_on = [docker_container.phpmyadmin]
@@ -276,16 +292,20 @@ resource "docker_container" "ngrok" {
 # Redis Container
 # ----------------------------
 resource "docker_volume" "redis_data" {
-  name = "${var.project_name}-redis-data"
+  count = var.enable_redis ? 1 : 0
+  name  = "${var.project_name}-redis-data"
 }
 
 resource "docker_image" "redis" {
+  count        = var.enable_redis ? 1 : 0
   name         = "redis:${var.redis_version}"
   keep_locally = true
 }
 
 resource "docker_container" "redis" {
-  image = docker_image.redis.image_id
+  count = var.enable_redis ? 1 : 0
+  # image = docker_image.redis.image_id
+  image = docker_image.redis[0].image_id
   name  = "${var.project_name}-redis"
 
   restart = "unless-stopped"
@@ -300,9 +320,16 @@ resource "docker_container" "redis" {
     external = var.redis_external_port
   }
 
-  volumes {
-    volume_name    = docker_volume.redis_data.name
-    container_path = "/data"
+  # volumes {
+  # volume_name    = docker_volume.redis_data.name
+  # container_path = "/data"
+  # }
+  dynamic "volumes" {
+    for_each = var.enable_redis ? [1] : []
+    content {
+      volume_name    = docker_volume.mysql_data[0].name #fixed: [0]
+      container_path = "/data"
+    }
   }
 
   memory = 256
@@ -327,16 +354,19 @@ resource "docker_container" "redis" {
 # MongoDB Container
 # ----------------------------
 resource "docker_volume" "mongodb_data" {
-  name = "${var.project_name}-mongodb-data"
+  count = var.enable_mongodb ? 1 : 0
+  name  = "${var.project_name}-mongodb-data"
 }
 
 resource "docker_image" "mongodb" {
+  count        = var.enable_mongodb ? 1 : 0
   name         = "mongo:${var.mongodb_version}"
   keep_locally = true
 }
 
 resource "docker_container" "mongodb" {
-  image = docker_image.mongodb.image_id
+  count = var.enable_mongodb ? 1 : 0
+  image = docker_image.mongodb[0].image_id
   name  = "${var.project_name}-mongodb"
 
   restart = "unless-stopped"
@@ -351,11 +381,17 @@ resource "docker_container" "mongodb" {
     external = var.mongodb_external_port
   }
 
-  volumes {
-    volume_name    = docker_volume.mongodb_data.name
-    container_path = "/data/db"
+  # volumes {
+  # volume_name    = docker_volume.mongodb_data.name
+  # container_path = "/data/db"
+  # }
+  dynamic "volumes" { #fixed: dynamic block
+    for_each = var.enable_mongodb ? [1] : []
+    content {
+      volume_name    = docker_volume.mongodb_data[0].name
+      container_path = "/data/db"
+    }
   }
-
   env = [
     "MONGO_INITDB_ROOT_USERNAME=${var.mongodb_root_user}",
     "MONGO_INITDB_ROOT_PASSWORD=${var.mongodb_root_password}"
@@ -381,43 +417,46 @@ resource "docker_container" "mongodb" {
 
 # Red para Cassandra
 resource "docker_network" "cassandra_network" {
-  name = var.network_name
+  count  = var.enable_cassandra ? 1 : 0
+  name   = var.network_name
   driver = "bridge"
 }
 
 # Volumen para persistir datos
 resource "docker_volume" "cassandra_data" {
-  name = var.volume_name
+  count = var.enable_cassandra ? 1 : 0
+  name  = var.volume_name
 }
 
 # Contenedor de Cassandra
 resource "docker_container" "cassandra" {
+  count = var.enable_cassandra ? 1 : 0
   name  = var.container_name
-  image = docker_image.cassandra.image_id
+  image = docker_image.cassandra[0].image_id #fixed: [0]
 
   # Puertos
   ports {
-    internal = 9042  # Puerto CQL nativo
+    internal = 9042 # Puerto CQL nativo
     external = var.cassandra_port
   }
 
   ports {
-    internal = 7000  # Puerto inter-nodo
+    internal = 7000 # Puerto inter-nodo
     external = var.cassandra_inter_node_port
   }
 
   ports {
-    internal = 7001  # Puerto SSL inter-nodo
+    internal = 7001 # Puerto SSL inter-nodo
     external = var.cassandra_ssl_inter_node_port
   }
 
   ports {
-    internal = 7199  # Puerto JMX
+    internal = 7199 # Puerto JMX
     external = var.cassandra_jmx_port
   }
 
   ports {
-    internal = 9160  # Puerto Thrift (legacy)
+    internal = 9160 # Puerto Thrift (legacy)
     external = var.cassandra_thrift_port
   }
 
@@ -436,19 +475,32 @@ resource "docker_container" "cassandra" {
   ]
 
   # Volúmenes
-  volumes {
-    volume_name    = docker_volume.cassandra_data.name
-    container_path = "/var/lib/cassandra"
-  }
+  # volumes {
+  # volume_name    = docker_volume.cassandra_data.name
+  # container_path = "/var/lib/cassandra"
+  # }
 
   # Red
-  networks_advanced {
-    name = docker_network.cassandra_network.name
+  # networks_advanced {
+  # name = docker_network.cassandra_network.name
+  # }
+  dynamic "volumes" {
+    for_each = var.enable_cassandra ? [1] : []
+    content {
+      volume_name    = docker_volume.cassandra_data[0].name
+      container_path = "/var/lib/cassandra"
+    }
+  }
+  dynamic "networks_advanced" { # fixed: dynamic block
+    for_each = var.enable_cassandra ? [1] : []
+    content {
+      name = docker_network.cassandra_network[0].name # fixed:[0]
+    }
   }
 
   # Configuración de recursos
   memory = var.memory_limit
-  
+
   # Health check
   healthcheck {
     test         = ["CMD-SHELL", "cqlsh -e 'describe cluster' || exit 1"]
@@ -460,34 +512,39 @@ resource "docker_container" "cassandra" {
 
   # Restart policy
   restart = "unless-stopped"
-
   # Esperar a que la red esté lista
   depends_on = [docker_network.cassandra_network]
 }
 
 # Imagen de Cassandra
 resource "docker_image" "cassandra" {
-  name = "${var.cassandra_image}:${var.cassandra_version}"
-  
+  count = var.enable_cassandra ? 1 : 0
+  name  = "${var.cassandra_image}:${var.cassandra_version}"
+
   # No eliminar la imagen al destruir
   keep_locally = true
 }
 
 # Contenedor opcional para herramientas de administración (cqlsh)
 resource "docker_container" "cassandra_tools" {
-  count = var.enable_tools_container ? 1 : 0
-  
+  count = var.enable_cassandra ? 1 : 0
+
   name  = "${var.container_name}-tools"
-  image = docker_image.cassandra.image_id
-  
+  image = docker_image.cassandra[0].image_id
+
   # Mantener el contenedor corriendo
   command = ["tail", "-f", "/dev/null"]
-  
+
   # Red
-  networks_advanced {
-    name = docker_network.cassandra_network.name
+  # networks_advanced {
+  # name = docker_network.cassandra_network.name
+  # }
+  dynamic "networks_advanced" {
+    for_each = var.enable_cassandra ? [1] : []
+    content {
+      name = docker_network.cassandra_network[0].name
+    }
   }
-  
   # Depende del contenedor principal
   depends_on = [docker_container.cassandra]
 }
