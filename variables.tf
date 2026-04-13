@@ -1,3 +1,40 @@
+# Controles de habilitación/deshabilitación
+variable "enable_mysql" {
+  description = "Habilitar contenedor MySQL"
+  type        = bool
+  default     = true
+}
+
+variable "enable_redis" {
+  description = "Habilitar contenedor Redis"
+  type        = bool
+  default     = true
+}
+
+variable "enable_mongodb" {
+  description = "Habilitar contenedor MongoDB"
+  type        = bool
+  default     = true
+}
+
+variable "enable_cassandra" {
+  description = "Habilitar contenedor Cassandra"
+  type        = bool
+  default     = true
+}
+
+variable "enable_phpmyadmin" {
+  description = "Habilitar contenedor phpMyAdmin"
+  type        = bool
+  default     = true
+}
+
+variable "enable_ngrok" {
+  description = "Habilitar contenedor ngrok"
+  type        = bool
+  default     = true
+}
+
 # Variables generales
 variable "environment" {
   description = "Entorno de despliegue"
@@ -249,7 +286,7 @@ variable "heap_newsize" {
 variable "memory_limit" {
   description = "Límite de memoria del contenedor en bytes"
   type        = number
-  default     = 1073741824  # 1GB
+  default     = 1073741824 # 1GB
 }
 
 variable "cassandra_username" {

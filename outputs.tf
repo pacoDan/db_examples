@@ -52,10 +52,16 @@ output "network_info" {
 
 # Información de volúmenes
 output "volumes_info" {
-  description = "Información de los volúmenes"
+  description = "Información de los volúmenes creados"
   value = {
-    mysql_data   = docker_volume.mysql_data.name
-    ngrok_config = docker_volume.ngrok_config.name
+    # mysql_data   = docker_volume.mysql_data.name
+    # ngrok_config = docker_volume.ngrok_config.name
+    mysql_data     = var.enable_mysql ? docker_volume.mysql_data[0].name : null
+    ngrok_config   = var.enable_ngrok ? docker_volume.ngrok_config[0].name : null
+    redis_data     = var.enable_redis ? docker_volume.redis_data[0].name : null
+    mongodb_data   = var.enable_mongodb ? docker_volume.mongodb_data[0].name : null
+    cassandra_data = var.enable_cassandra ? docker_volume.cassandra_data[0].name : null
+
   }
 }
 
@@ -69,3 +75,25 @@ output "ngrok_url_instructions" {
 #   value       = local.ngrok_api_response.tunnels[0].public_url
 # }
 
+output "enabled_services" {
+  description = "Servicios habilitados"
+  value = {
+    mysql      = var.enable_mysql
+    redis      = var.enable_redis
+    mongodb    = var.enable_mongodb
+    cassandra  = var.enable_cassandra
+    phpmyadmin = var.enable_phpmyadmin
+    ngrok      = var.enable_ngrok
+  }
+}
+
+output "service_ports" {
+  description = "Puertos de servicios activos"
+  value = {
+    mysql      = var.enable_mysql ? var.mysql_external_port : null
+    redis      = var.enable_redis ? var.redis_external_port : null
+    mongodb    = var.enable_mongodb ? var.mongodb_external_port : null
+    cassandra  = var.enable_cassandra ? var.cassandra_port : null
+    phpmyadmin = var.enable_phpmyadmin ? var.phpmyadmin_external_port : null
+  }
+}

@@ -1,3 +1,11 @@
+# Controles de habilitación/deshabilitación
+enable_mysql       = true
+enable_redis       = false
+enable_mongodb     = false
+enable_cassandra   = false  # Deshabilitado como ejemplo
+enable_phpmyadmin  = true
+enable_ngrok       = true
+
 ngrok_tunnel_target = "database-infrastructure-phpmyadmin:80"
 # Configuración del proyecto
 environment  = "production"
